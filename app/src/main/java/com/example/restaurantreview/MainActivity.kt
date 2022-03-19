@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.restaurantreview.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -32,9 +33,9 @@ class MainActivity : AppCompatActivity() {
             this,
             ViewModelProvider.NewInstanceFactory()
         ).get(MainViewModel::class.java)
-        mainViewModel.restaurant.observe(this, { restaurant ->
+        mainViewModel.restaurant.observe(this) { restaurant ->
             setRestaurantData(restaurant)
-        })
+        }
 
         val layoutManager = LinearLayoutManager(this)
         binding.rvReview.layoutManager = layoutManager
@@ -43,13 +44,24 @@ class MainActivity : AppCompatActivity() {
         binding.rvReview.addItemDecoration(itemDecoration)
 
 
-        mainViewModel.listReview.observe(this, { consumerReviews ->
+        mainViewModel.listReview.observe(this) { consumerReviews ->
             setReviewData(consumerReviews)
-        })
+        }
 
-        mainViewModel.isLoading.observe(this, {
+        mainViewModel.isLoading.observe(this) {
             showLoading(it)
-        })
+        }
+
+        mainViewModel.snackbarText.observe(this) {
+            it.getContentIfNotHandled()?.let { snackBarText ->
+                Snackbar.make(
+                    window.decorView.rootView,
+                    snackBarText,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+
 
         binding.btnSend.setOnClickListener { view ->
             mainViewModel.postReview(binding.edReview.text.toString())
